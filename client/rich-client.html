@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rich Client!</title>
+
+</head>
+
+<body>
+
+  <h1>"Rich" Client for <i>Simple HTTP Server</i></h1>
+  <h2>View the "Hello" Message</h2>
+  <p><button id="btn-hello">See contents of <kbd>/helloJSON</kbd></button></p>
+  <div id="output-hello">???</div>
+
+  <hr>
+
+  <h2>View the "Current Time" Message</h2>
+  <p><button id="btn-time">See contents of <kbd>/timeJSON</kbd></button></p>
+  <div id="output-time">???</div>
+
+  <hr>
+
+  <h2>View Random Quote</h2>
+  <p><button id="btn-random">Show random quote</button></p>
+  <div id="output-random">???</div>
+
+  <hr>
+
+  <h2>View Recent Quote</h2>
+  <p><button id="btn-recent">Show most recent quote</kbd></button></p>
+  <div id="output-recent">???</div>
+
+  <hr>
+
+  <h2>A Dank Meme ...</h2>
+
+  <img src="spongegar.png" width="200" alt="SPONGEGAR" />
+
+</body>
+<script>
+  const getJsonFetch = async (url, callback) => {
+    let json;
+    try {
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Accept": "application/json"
+        }
+      });
+      json = await response.json();
+    }
+    catch (error) {
+      console.log("ERROR:", error);
+      json = { author: `Can't parse data file '${url}'` };
+    }
+    callback(json);
+  };
+
+  const btnHello = document.querySelector("#btn-hello");
+  const outputHello = document.querySelector("#output-hello");
+  const btnTime = document.querySelector("#btn-time");
+  const outputTime = document.querySelector("#output-time");
+  const btnRandom = document.querySelector("#btn-random");
+  const outputRandom = document.querySelector("#output-random");
+  const btnRecent = document.querySelector("#btn-recent");
+  const outputRecent = document.querySelector("#output-recent");
+
+
+  const helloJSONURL = "api/helloJSON";
+  const timeJSONURL = "api/timeJSON";
+  const randomJSONURL = "quotes/random";
+  const recentJSONURL = "quotes/recent";
+
+
+  const helloCallback = json => {
+    outputHello.innerHTML = json.message || "No value found!";
+  };
+
+  const timeCallback = json => {
+    outputTime.innerHTML = json.time || "No value found!";
+  }
+
+  const randomCallback = json => {
+    outputRandom.innerHTML = quoteComponent(json.author, json.content) || "No value found!";
+  }
+
+  const recentCallback = json => {
+    outputRecent.innerHTML = quoteComponent(json.author, json.content) || "No value found!";
+  }
+
+  btnHello.onclick = () => getJsonFetch(helloJSONURL, helloCallback);
+  btnTime.onclick = () => getJsonFetch(timeJSONURL, timeCallback);
+  btnRandom.onclick = () => getJsonFetch(randomJSONURL, randomCallback);
+  btnRecent.onclick = () => getJsonFetch(recentJSONURL, recentCallback);
+
+  const quoteComponent = (author, content) => {
+   return ` <h2 class="text-white text-2xl font-bold pb-2">${author}</h2>
+            <p class="text-gray-300 py-1"><i>"${content}"</i></p>`
+
+
+  }
+
+</script>
+
+</html>
