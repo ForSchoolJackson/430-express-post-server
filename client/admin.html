@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Page!</title>
+    <style>
+        h1,
+        h2 {
+            font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+        }
+
+        #output-new-hoot {
+            border: 1px solid gray;
+            width: 620px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Admin Page</h1>
+    <hr>
+    <h2>I. See all the hoots!</h2>
+    <p><button id="btn-all-hoots">Fetch <kbd>/api/hoots</kbd></button></p>
+    <h3>Results:</h3>
+    <div id="output-all-hoots">???</div>
+
+    <hr>
+
+    <h2>II. Add a hoot!</h2>
+    <form id="form-add-hoot">
+        <label>Content: <input type="text" name="content" size="80"></label><br><br>
+        <button type="submit">Send POST Request to <kbd>/api/addHoot</kbd></button>
+    </form>
+    <h3>Results:</h3>
+    <div id="output-new-hoot">???</div>
+
+    <hr>
+
+    <h2>III. Delete a hoot!</h2>
+    <form id="form-delete-hoot">
+        <label>Id: <input type="text" name="hoot-id" size="36"></label><br><br>
+        <button type="submit">Send DELETE Request to <kbd>/api/deleteHoot</kbd></button>
+    </form>
+
+    <div id="output-delete-hoot">???</div>
+
+    <hr>
+
+    <h2>IV. Edit a hoot!</h2>
+    <form id="form-edit-hoot">
+        <label>Id: <input type="text" name="hoot-id" size="36"></label><br>
+        <label>New content: <input type="text" name="content" size="80"></label><br><br>
+        <button type="submit">Send PUT Request to <kbd>/api/updateHoot/</kbd></button>
+    </form>
+
+    <div id="output-edit-hoot">???</div>
+
+    <hr>
+
+</body>
+<script>
+    const getJsonFetch = async (url, callback) => {
+        let json;
+        try {
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+            json = await response.json();
+        }
+        catch (error) {
+            console.log('ERROR:', error);
+            json = { author: `Can't parse data file '${url}'` };
+        }
+        callback(json);
+    };
+
+    /* GET All Hoots */
+    const allHootsCB = selector => {
+        const element = document.querySelector(selector);
+        return json => element.innerHTML = json.map(
+            h => `<p>
+            "${h.content}" - 
+            <b>id:</b> ${h.id} - 
+            <b>created:</b> ${h.createdAt}
+          </p>`
+        ).join('');
+    };
+
+    const btnAllHoots = document.querySelector('#btn-all-hoots');
+    const allHootsURL = '/api/hoots';
+    btnAllHoots.onclick = () => {
+        getJsonFetch(allHootsURL, allHootsCB('#output-all-hoots'));
+    };
+
+    const postJsonFetch = async (url, payload, callback) => {
+        let json;
+        let status;
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'content-type': "application/json"
+                },
+                body: JSON.stringify(payload),
+            });
+            json = await response.json();
+            status = `status ${response.status} : ${response.statusText}`;
+        }
+        catch (error) {
+            console.log('ERROR:', error);
+            json = { error: `Cant parse data file '${url}'` };
+        }
+        callback(json, status);
+    };
+
+</script>
+
+</html>

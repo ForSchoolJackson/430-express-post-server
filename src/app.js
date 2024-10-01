@@ -13,6 +13,7 @@ const complainRouter = require('./routes/complain.js');
 const app = express();
 
 app.use(express.static('client'));
+app.use(express.json());
 
 app.use('/', indexRouter);
 app.use('/quotes', quotesRouter);

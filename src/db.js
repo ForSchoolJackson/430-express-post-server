@@ -35,6 +35,8 @@ const getQuoteById = (id) => {
   return foundQuote || {};
 };
 
+const generateNewId = () => crypto.randomUUID();
+
 module.exports = {
-  getAllQuotes, getTimeString, randomQuote, recentQuote, getQuoteById,
+  getAllQuotes, getTimeString, randomQuote, recentQuote, getQuoteById, generateNewId,
 };
