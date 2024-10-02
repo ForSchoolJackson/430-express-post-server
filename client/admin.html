@@ -58,6 +58,15 @@
     <div id="output-edit-hoot">???</div>
 
     <hr>
+    <h2>V. View one hoot!</h2>
+    <form id="form-view-hoot">
+        <label>Id: <input type="text" name="hoot-id" size="36"></label><br><br>
+        <button type="submit">Send GET Request to <kbd>/api/hoots/:id</kbd></button>
+    </form>
+
+    <div id="output-view-hoot">???</div>
+
+    <hr>
 
 </body>
 <script>
@@ -97,12 +106,12 @@
         getJsonFetch(allHootsURL, allHootsCB('#output-all-hoots'));
     };
 
-    const postJsonFetch = async (url, payload, callback) => {
+    const postJsonFetch = async (url, payload, callback, method = 'POST') => {
         let json;
         let status;
         try {
             const response = await fetch(url, {
-                method: 'POST',
+                method: method,
                 headers: {
                     'Accept': 'application/json',
                     'content-type': "application/json"
@@ -117,6 +126,65 @@
             json = { error: `Cant parse data file '${url}'` };
         }
         callback(json, status);
+    };
+
+    const addHootCallback = selector => {
+        const element = document.querySelector(selector);
+        return (json, status) => {
+            element.innerHTML = `
+            <div>
+                <p><b>id:</b> ${json.id}</p>
+                <p><b>content:</b> ${json.content}</p>
+                <p><b>createdAt:</b> ${json.createdAt}</p>
+            </div>
+            <p><b>${status}</b></p>
+            `;
+        };
+    };
+
+    const addHootForm = document.querySelector('#form-add-hoot');
+    const newHootURL = '/api/addHoot';
+    addHootForm.onsubmit = (evt) => {
+        evt.preventDefault();
+        const content = addHootForm['content'].value;
+        const payload = {
+            content,
+        };
+        addHootForm['content'].value = '';
+        postJsonFetch(newHootURL, payload, addHootCallback('#output-new-hoot'));
+    };
+
+    const deleteHootForm = document.querySelector('#form-delete-hoot');
+    const deleteHootURL = '/api/deleteHoot';
+    deleteHootForm.onsubmit = (evt) => {
+        evt.preventDefault();
+        const id = deleteHootForm['hoot-id'].value.trim();
+        const payload = {};
+        deleteHootForm['hoot-id'].value = '';
+        postJsonFetch(`${deleteHootURL}/${id}`, payload, addHootCallback('#output-delete-hoot'), 'DELETE');
+    };
+
+    const updateHootForm = document.querySelector('#form-edit-hoot');
+    const updateHootURL = '/api/updateHoot';
+    updateHootForm.onsubmit = (evt) => {
+        evt.preventDefault();
+        const id = updateHootForm['hoot-id'].value.trim();
+        const content = updateHootForm['content'].value;
+        const payload = {
+            content,
+        };
+        updateHootForm['hoot-id'].value = '';
+        updateHootForm['content'].value = '';
+        postJsonFetch(`${updateHootURL}/${id}`, payload, addHootCallback('#output-edit-hoot'), 'PUT');
+    };
+
+    const viewHootForm = document.querySelector('#form-view-hoot');
+    const viewHootURL = '/api/hoots/:id';
+    viewHootForm.onsubmit = (evt) => {
+        evt.preventDefault();
+        const id = viewHootForm['hoot-id'].value.trim();
+        const payload = {};
+        postJsonFetch(viewHootURL, payload, addHootCallback('#output-view-hoot'));
     };
 
 </script>
