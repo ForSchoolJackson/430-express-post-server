@@ -142,6 +142,19 @@
         };
     };
 
+    const getHootCallback = selector => {
+        const element = document.querySelector(selector);
+        return (json, status) => {
+            element.innerHTML = `
+            <div>
+                <p><b>id:</b> ${json.id}</p>
+                <p><b>content:</b> ${json.content}</p>
+                <p><b>createdAt:</b> ${json.createdAt}</p>
+            </div>
+            `;
+        };
+    };
+
     const addHootForm = document.querySelector('#form-add-hoot');
     const newHootURL = '/api/addHoot';
     addHootForm.onsubmit = (evt) => {
@@ -179,12 +192,12 @@
     };
 
     const viewHootForm = document.querySelector('#form-view-hoot');
-    const viewHootURL = '/api/hoots/:id';
+    const viewHootURL = '/api/hoots';
     viewHootForm.onsubmit = (evt) => {
         evt.preventDefault();
         const id = viewHootForm['hoot-id'].value.trim();
-        const payload = {};
-        postJsonFetch(viewHootURL, payload, addHootCallback('#output-view-hoot'));
+        viewHootForm['hoot-id'].value = '';
+        getJsonFetch(`${viewHootURL}/${id}`, getHootCallback('#output-view-hoot'));
     };
 
 </script>

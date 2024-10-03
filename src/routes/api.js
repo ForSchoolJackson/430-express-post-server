@@ -37,9 +37,12 @@ router.post('/addHoot', (req, res) => {
     content,
     createdAt: new Date(),
   };
-
-  hoots.push(hoot);
-  res.status(201).json(hoot);
+  if (content === 'No req.body or req.body.content found!') {
+    res.status(400).json(hoot);
+  } else {
+    hoots.push(hoot);
+    res.status(201).json(hoot);
+  }
 });
 
 const getHootById = (id) => {
@@ -74,9 +77,13 @@ router.put('/updateHoot/:id([0-9,a-z,A-Z,-]{36})', (req, res) => {
     const content = req.body && req.body.content
       ? req.body.content
       : 'No req.body or req.body.content found!';
-    hoot.content = content;
-    hoot.updatedAt = new Date();
-    res.json(hoot);
+    if (content === 'No req.body or req.body.content found!') {
+      res.status(400).json(hoot);
+    } else {
+      hoot.content = content;
+      hoot.updatedAt = new Date();
+      res.json(hoot);
+    }
   }
 });
 
@@ -86,7 +93,7 @@ router.get('/hoots/:id([0-9,a-z,A-Z,-]{36})', (req, res) => {
     const error = `id: '${req.params.id}' not found`;
     res.status(404).send({ error });
   } else {
-    res.json(hoot);
+    res.status(200).json(hoot);
   }
 });
 
