@@ -7,9 +7,51 @@ const hoots = [{
   id: db.generateNewId(),
   content: "Let's Rock!",
   createdAt: new Date(),
-}];
+},
+{
+  id: db.generateNewId(),
+  content: 'Birds arent real!',
+  createdAt: new Date(),
+},
+];
+
+const hootToXML = (hoot) => {
+  let xmlStr = `<hoot id="${hoot.id}" createdAt="${hoot.createdAt}">`;
+  xmlStr += hoot.content;
+  xmlStr += '</hoot>';
+  return xmlStr;
+};
 
 // paths
+
+router.head('/hoots', (req, res) => {
+  console.log('HEAD called');
+  const { length } = JSON.stringify(hoots);
+  res.set({
+    'Content-Type': 'application/json',
+    'Content-Length': length,
+    'X-Coder': 'JH',
+  });
+  res.end();
+});
+
+router.get('/hoots', (req, res) => {
+  console.log('GET called');
+  res.json(hoots);
+});
+
+router.get('/hoots', (req, res) => {
+  if (req.get('Accept') === 'application/xml') {
+    res.header('Content-Type', 'application/xml');
+    // OR res.type('application/xml');
+    const str = `<hoots>
+    ${hoots.map((h) => hootToXML(h)).join('')}
+    </hoots>`;
+    res.send(str);
+  } else {
+    res.json(hoots);
+  }
+});
 
 router.get('/helloJSON', (req, res) => {
   res.json({

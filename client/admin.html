@@ -68,6 +68,11 @@
 
     <hr>
 
+    <h2>VI. See all the hoots! (XML Version)</h2>
+    <p><button id="btn-all-hoots-xml">Fetch XML <kbd>/api/hoots</kbd></button></p>
+    <h3>Results:</h3>
+    <div id="output-all-hoots-xml">???</div>
+
 </body>
 <script>
     const getJsonFetch = async (url, callback) => {
@@ -155,6 +160,48 @@
         };
     };
 
+    //XML
+    const getXMLFetch = async (url, callback) => {
+        const parser = new DOMParser();
+        let text;
+        let xml;
+        try {
+            const response = await fetch(url, {
+                methos: 'GET',
+                headers: {
+                    'Accept': 'application/xml'
+                }
+            });
+            text = await response.text();
+            xml = parser.parseFromString(text, 'text/xml');
+        }
+        catch (error) {
+            console.log('ERROR:', error);
+            text = `<response>
+                <msg>Cant parse data file '${url}'</msg>
+                </response>`;
+            xml = parser.parseFromString(text, 'text/xml');
+        }
+        callback(xml);
+    }
+
+    const allHootsXmlCB = selector => {
+        const element = document.querySelector(selector);
+        return xml => {
+            console.log(xml);
+            const hoots = xml.querySelectorAll("hoot");
+            console.log(`Num hoots = ${hoots.length}`);
+            for (let h of hoots) {
+                element.innerHTML += `
+                <p>
+                    "${h.textContent}" -
+                    <b>id:</b> ${h.getAttribute('id')} -
+                    <b>created:</b> ${h.getAttribute('createdAt')}
+                    </p>`
+            };
+        };
+    };
+
     const addHootForm = document.querySelector('#form-add-hoot');
     const newHootURL = '/api/addHoot';
     addHootForm.onsubmit = (evt) => {
@@ -198,6 +245,10 @@
         const id = viewHootForm['hoot-id'].value.trim();
         viewHootForm['hoot-id'].value = '';
         getJsonFetch(`${viewHootURL}/${id}`, getHootCallback('#output-view-hoot'));
+    };
+
+    const xmlHootForm = document.querySelector('#output-all-hoots-xml');
+    xmlHootForm.onsubmit = (evt) => {
     };
 
 </script>
