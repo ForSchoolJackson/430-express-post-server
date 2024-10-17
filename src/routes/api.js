@@ -3,14 +3,26 @@ const db = require('../db.js');
 
 const router = express.Router();
 
+// const hoots = [{
+//   id: db.generateNewId(),
+//   content: "Let's Rock!",
+//   createdAt: new Date(),
+// },
+// {
+//   id: db.generateNewId(),
+//   content: 'Birds arent real!',
+//   createdAt: new Date(),
+// },
+// ];
+
 const hoots = [{
-  id: db.generateNewId(),
+  id: '11111111-2222-3333-4444-555555555555',
   content: "Let's Rock!",
   createdAt: new Date(),
 },
 {
-  id: db.generateNewId(),
-  content: 'Birds arent real!',
+  id: '66666666-7777-8888-9999-000000000000',
+  content: "Bird's aren't real!",
   createdAt: new Date(),
 },
 ];
@@ -35,12 +47,15 @@ router.head('/hoots', (req, res) => {
   res.end();
 });
 
-router.get('/hoots', (req, res) => {
-  console.log('GET called');
-  res.json(hoots);
-});
+// router.get('/hoots', (req, res) => {
+//   console.log('GET called');
+//   res.json(hoots);
+// });
 
 router.get('/hoots', (req, res) => {
+  //if the "Accept" header contains "application/xml"
+  //if (req.accepts('application/xml')){
+
   if (req.get('Accept') === 'application/xml') {
     res.header('Content-Type', 'application/xml');
     // OR res.type('application/xml');

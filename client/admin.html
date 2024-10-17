@@ -15,6 +15,24 @@
             border: 1px solid gray;
             width: 620px;
         }
+
+        .table {
+            display: table;
+            border: 1px solid black;
+        }
+
+        .table .row {
+            display: table-row;
+        }
+
+        .table .row>* {
+            display: table-cell;
+            border: 1px solid red;
+            padding: 10px;
+            background-color: beige;
+        }
+
+        /* https://wisdmlabs.com/blog/responsive-tables-using-css-div-tag/ */
     </style>
 </head>
 
@@ -73,6 +91,60 @@
     <h3>Results:</h3>
     <div id="output-all-hoots-xml">???</div>
 
+    <hr>
+
+    <h2>VII. View one quote (Old School GET, no JS)!</h2>
+    <form action="/quotes" method="GET">
+        <label>Id: <input type="text" name="id" size="36"></label><br><br>
+        <button type="submit">Send "No JS" Request to <kbd>/quotes?id=</kbd></button>
+        <input type="hidden" name="loggedin" value="true" />
+    </form>
+
+    <p><i>This will re-direct the browser to the <kbd>/quotes?id=</kbd> endpoint, and display whatever the server sent
+            back.</i></p>
+    <p>You can use <kbd>4c6217c3-c6e5-460b-8f8f-0df64ad6fef2</kbd> to view the Mark Twain quote.</p>
+
+    <hr>
+
+    <h2>VIII. Add a Hoot (Old School POST, no JS)!</h2>
+    <form action="/api/addHoot" method="POST">
+        <label>Content: <input type="text" name="content" size="80"></label><br><br>
+        <button type="submit">Send "No JS" Request to <kbd>/api/addHoot</kbd></button>
+    </form>
+
+    <p>This will call the existing <kbd>POST</kbd> <kbd>/api/addHoot</kbd> endpoint.</p>
+    <p>Unlike the <kbd>GET</kbd> above where the data (e.g. <kbd>/quotes?id=12345</kbd>) is passed to the server via the
+        <i>query string</i>, here the data will be passed to the server-side script in a <i>separate file.</i>
+    </p>
+
+    <hr>
+
+    <h2>IX. Delete or Edit all the hoots (IMPROVED)!</h2>
+    <form id="form-delete-edit-hoot-improved" class="table">
+        <!-- row #0 -->
+        <div class="row">
+            <span class="row-id">id: 11111111-2222-3333-4444-555555555555</span>
+            <input type="hidden" name="hoot-id-0" value="11111111-2222-3333-4444-555555555555">
+            <label><b>Content:</b> <input type="text" name="content-0" size="30" value="Let's Rock!"></label>
+            <button type="submit" name="UPDATE-0">UPDATE</button>
+            <button type="submit" name="DELETE-0">DELETE</button>
+        </div>
+
+        <!-- row #1 -->
+        <div class="row">
+            <span class="row-id">id: 66666666-7777-8888-9999-000000000000</span>
+            <input type="hidden" name="hoot-id-1" value="66666666-7777-8888-9999-000000000000">
+            <label><b>Content:</b> <input type="text" name="content-1" size="30" value="Bird's aren't real!"></label>
+            <button type="submit" name="UPDATE-1">UPDATE</button>
+            <button type="submit" name="DELETE-1">DELETE</button>
+        </div>
+
+        <!-- etc for row #2 and beyond -->
+        <!-- you will need to generate this entire form and all its rows dynamically, with JS! -->
+    </form>
+    <h3>Results:</h3>
+    <div id="output-edit-hoot-improved">???</div>
+
 </body>
 <script>
     const getJsonFetch = async (url, callback) => {
@@ -103,12 +175,6 @@
             <b>created:</b> ${h.createdAt}
           </p>`
         ).join('');
-    };
-
-    const btnAllHoots = document.querySelector('#btn-all-hoots');
-    const allHootsURL = '/api/hoots';
-    btnAllHoots.onclick = () => {
-        getJsonFetch(allHootsURL, allHootsCB('#output-all-hoots'));
     };
 
     const postJsonFetch = async (url, payload, callback, method = 'POST') => {
@@ -167,7 +233,7 @@
         let xml;
         try {
             const response = await fetch(url, {
-                methos: 'GET',
+                method: 'GET',
                 headers: {
                     'Accept': 'application/xml'
                 }
@@ -188,9 +254,10 @@
     const allHootsXmlCB = selector => {
         const element = document.querySelector(selector);
         return xml => {
-            console.log(xml);
+            //console.log(xml);
             const hoots = xml.querySelectorAll("hoot");
-            console.log(`Num hoots = ${hoots.length}`);
+            //console.log(`Num hoots = ${hoots.length}`);
+            element.innerHTML = '';
             for (let h of hoots) {
                 element.innerHTML += `
                 <p>
@@ -200,6 +267,12 @@
                     </p>`
             };
         };
+    };
+
+    const btnAllHoots = document.querySelector('#btn-all-hoots');
+    const allHootsURL = '/api/hoots';
+    btnAllHoots.onclick = () => {
+        getJsonFetch(allHootsURL, allHootsCB('#output-all-hoots'));
     };
 
     const addHootForm = document.querySelector('#form-add-hoot');
@@ -247,9 +320,38 @@
         getJsonFetch(`${viewHootURL}/${id}`, getHootCallback('#output-view-hoot'));
     };
 
-    const xmlHootForm = document.querySelector('#output-all-hoots-xml');
-    xmlHootForm.onsubmit = (evt) => {
+    const xmlHootForm = document.querySelector('#btn-all-hoots-xml');
+    const xmlHootURL = '/api/hoots';
+    xmlHootForm.onclick = () => {
+        getXMLFetch(xmlHootURL, allHootsXmlCB('#output-all-hoots-xml'));
     };
+
+    //IMPORVED DELETE/EDIT FORM
+
+    const formDeleteEditHootImporved = document.querySelector('#form-delete-edit-hoot-improved');
+
+    formDeleteEditHootImporved.onsubmit = (evt) => {
+        evt.preventDefault();
+        const form = evt.target;
+        let buttonClicked = evt.submitter;
+        let [buttonClickedName, row] = buttonClicked.name.split("-");
+        const id = form[`hoot-id-${row}`].value;
+        const content = form[`content-${row}`].value;
+        form[`content-${row}`].value = '';
+
+        const payload = {}; //empty for DELETE needs a .contenet for PUT
+        if (buttonClickedName == 'DELETE') {
+            console.log(`DELETE with id=${id}`);
+            postJsonFetch(`${deleteHootURL}/${id}`, payload, addHootCallback('#output-edit-hoot-improved'), 'DELETE');
+        } else {
+            //EDIT
+            console.log(`PUT with id=${id}, content=${content}`);
+            //two more lines
+            const payload = { content, };
+            postJsonFetch(`${updateHootURL}/${id}`, payload, addHootCallback('#output-edit-hoot-improved'), 'PUT');
+        }
+    }
+
 
 </script>
 
